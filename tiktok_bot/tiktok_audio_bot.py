@@ -8,7 +8,7 @@ from aiogram.types import FSInputFile
 
 # ================= НАСТРОЙКИ =================
 # ВСТАВЬ СЮДА СВОЙ ТОКЕН ОТ @BotFather!
-BOT_TOKEN = ТВОЙ_ТОКЕН_ЗДЕСЬ
+BOT_TOKEN = 1780244359:Qbfa1vcveyHB0QuTw1RC3lNuszdqZCsk8MO
 # =============================================
 
 bot = Bot(token=BOT_TOKEN)
