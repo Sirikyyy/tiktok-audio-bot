@@ -46,7 +46,6 @@ def webhook():
         return jsonify({"ok": True}), 200
 
     except Exception as e:
-        # Выводим полную ошибку в логи Render
         print(f"КРИТИЧЕСКАЯ ОШИБКА В WEBHOOK: {e}")
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 200
@@ -74,6 +73,7 @@ def download_and_send_audio(chat_id, url):
         'outtmpl': f'/tmp/audio_{chat_id}.%(ext)s',
         'quiet': True,
         'no_warnings': True,
+        'impersonate': 'chrome', # <-- МАСКИРОВКА ПОД БРАУЗЕР
     }
 
     try:
@@ -82,7 +82,10 @@ def download_and_send_audio(chat_id, url):
             ydl.download([url])
         
         # Отправляем файл
-        send_audio(chat_id, file_path)
+        if os.path.exists(file_path):
+            send_audio(chat_id, file_path)
+        else:
+            send_message(chat_id, "❌ Ошибка: файл не был создан после скачивания.")
 
     except Exception as e:
         print(f"Ошибка yt-dlp: {e}")
@@ -92,7 +95,10 @@ def download_and_send_audio(chat_id, url):
     finally:
         # Удаляем файл, чтобы не забивать диск
         if os.path.exists(file_path):
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Ошибка при удалении файла: {e}")
 
 
 def send_audio(chat_id, file_path):
