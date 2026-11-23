@@ -2,6 +2,7 @@ import os
 import requests
 import yt_dlp
 import traceback
+from yt_dlp.networking.impersonate import ImpersonateTarget  # <-- ДОБАВЛЕН ИМПОРТ
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -63,6 +64,9 @@ def send_message(chat_id, text):
 def download_and_send_audio(chat_id, url):
     file_path = f"/tmp/audio_{chat_id}.mp3"
     
+    # СОЗДАЕМ ОБЪЕКТ IMPERSONATE TARGET
+    target = ImpersonateTarget(client='chrome')
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -73,7 +77,7 @@ def download_and_send_audio(chat_id, url):
         'outtmpl': f'/tmp/audio_{chat_id}.%(ext)s',
         'quiet': True,
         'no_warnings': True,
-        'impersonate': 'chrome', # <-- МАСКИРОВКА ПОД БРАУЗЕР
+        'impersonate': target,  # <-- ПЕРЕДАЕМ ОБЪЕКТ, А НЕ СТРОКУ
     }
 
     try:
