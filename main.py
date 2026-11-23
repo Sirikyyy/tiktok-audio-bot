@@ -4,9 +4,11 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Твой токен берется из настроек Render
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
+# Токен берем из настроек Render
+TELEGRAM_TOKEN = os.environ.get("1780244359:df7dCD0Qe38_xGedo9UQohwhDmMYO5-362P")
+
+# ТВОЙ НОВЫЙ АДРЕС ДЛЯ NYXGRAM
+NYXGRAM_API_URL = f"https://nyxgram.new.tg/bot{TELEGRAM_TOKEN}"
 
 @app.route("/")
 def home():
@@ -19,34 +21,33 @@ def webhook():
 
     update = request.get_json()
     
-    # Если пришло сообщение
     if "message" in update:
         chat_id = update["message"]["chat"]["id"]
         text = update["message"].get("text", "")
 
-        # Если написали /start
         if text == "/start":
             send_message(chat_id, "Привет! Я бот для скачивания аудио из TikTok. Отправь мне ссылку.")
 
     return jsonify({"ok": True}), 200
 
 def send_message(chat_id, text):
-    """Функция для отправки сообщения в Telegram"""
-    url = f"{TELEGRAM_API_URL}/sendMessage"
+    url = f"{NYXGRAM_API_URL}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
-    requests.post(url, json=payload)
+    # Отправляем запрос в Nyxgram
+    response = requests.post(url, json=payload)
+    # Для отладки можно вывести ответ в логи Render
+    print(f"Nyxgram response: {response.text}") 
 
 @app.route("/set_webhook", methods=["GET"])
 def set_webhook():
-    """Привязывает Telegram к нашему серверу"""
     if not TELEGRAM_TOKEN:
         return "Token not set", 500
     
-    # Получаем ссылку на наш сервис на Render
     render_url = os.environ.get("RENDER_EXTERNAL_URL")
     webhook_url = f"{render_url}/webhook"
     
-    url = f"{TELEGRAM_API_URL}/setWebhook?url={webhook_url}"
+    # Устанавливаем вебхук в Nyxgram
+    url = f"{NYXGRAM_API_URL}/setWebhook?url={webhook_url}"
     response = requests.get(url)
     return jsonify(response.json())
 
